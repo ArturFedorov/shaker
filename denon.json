@@ -1,0 +1,22 @@
+{
+  "$schema": "https://deno.land/x/denon/schema.json",
+  "scripts": {
+    "start": {
+      "cmd": "deno run server.ts",
+      "desc": "run my app.ts file",
+      "allow": [
+        "write",
+        "read",
+        "net"
+      ]
+    },
+    "lint": {
+      "cmd": "deno lint --unstable",
+      "desc": "run linter on all files"
+    },
+    "logger": {
+      "debug": true
+    }
+  }
+}
+
