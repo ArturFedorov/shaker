@@ -1,14 +1,14 @@
-import { Util } from "../shared/utils/Util.ts";
-import { Logger } from "./Logger.ts";
-import { Router } from "../deps.ts";
+import { Util } from '../shared/utils/Util.ts';
+import { Logger } from './Logger.ts';
+import { Router } from '../deps.ts';
 
 export class Routes {
   static async getConfiguredRoutes() {
     let routes: Router[] = [];
 
-    const allControllers = Util.findFilesInDirectory("src/", []);
+    const allControllers = Util.findFilesInDirectory('src/', []);
     if (!allControllers.length) {
-      Logger.appLogger.info("No files of controller found.");
+      Logger.appLogger.info('No files of controller found.');
     }
 
     for (const controllerPath of allControllers) {

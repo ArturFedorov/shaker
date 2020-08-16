@@ -1,7 +1,7 @@
-import { Context } from '../../deps.ts';
+import { RouterContext } from '../../deps.ts';
 import { router } from '../Router.ts';
 
-router.get('/items', (context: Context) => {
+router.get('/items', (context: RouterContext) => {
   context.response.body = 'HEllo';
 });
 

@@ -1,7 +1,7 @@
-import { Application } from "./deps.ts";
-import { AppConfiguration } from "./configs/AppConfiguration.ts";
-import { Logger } from "./server-configs/Logger.ts";
-import { Routes } from "./server-configs/Routes.ts";
+import { Application } from './deps.ts';
+import { AppConfiguration } from './configs/AppConfiguration.ts';
+import { Logger } from './server-configs/Logger.ts';
+import { Routes } from './server-configs/Routes.ts';
 
 const app = new Application();
 Logger.initLogger();
