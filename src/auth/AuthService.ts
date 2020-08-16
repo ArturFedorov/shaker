@@ -1,7 +1,7 @@
 export class AuthService {
   static baseUrl: string = 'https://accounts.spotify.com/';
-  static client_id: string = '82925db2f0554cc18280feb3aea59502';
-  static client_secret: string = '9951d95fe4f94a6d8be9e63d989c94a8';
+  static client_id: string = Deno.env.get('SPOTIFY_CLIENT_ID') as string;
+  static client_secret: string = Deno.env.get('SPOTIFY_CLIENT_SECRET') as string;
   static redirect_uri: string = 'http://localhost:3000/callback';
   static scopes: string = 'user-read-private user-read-email';
 

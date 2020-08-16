@@ -26,6 +26,7 @@ router
     const state = params.state || null;
     const storedState = context.cookies ? context.cookies.get(stateKey) : null;
 
+
     if (state === null || state != storedState) {
       const searchParams = new URLSearchParams();
       searchParams.set('error', 'state_mismatch')
@@ -39,6 +40,7 @@ router
       newSearchParams.set('code', code ? code : '');
       newSearchParams.set('redirect_uri', AuthService.redirect_uri);
       newSearchParams.set('grant_type', 'authorization_code');
+      // newSearchParams.set('grant_type', 'client_credentials')
 
       let authOptions = {
         url: `${AuthService.baseUrl}api/token`,
@@ -56,18 +58,19 @@ router
           body: authOptions.form
         })
 
-        const { access_token, refresh_token } = await response.json();
-        console.log(access_token, refresh_token);
+        const { access_token, refresh_token, expires_in} = await response.json();
 
-        context.response.body =  {access_token, refresh_token};
+        return fetch(`https://api.spotify.com/v1/me`, {
+          headers: { 'Authorization': `Bearer ${access_token}`}
+        }).then( async (response) => {
+          const user = await response.json();
+          // context.response.status = 200;
 
-        // return fetch(`https://api.spotify.com/v1/me`, {
-        //   headers: { 'Authorization': `Bearer ${access_token}`}
-        // }).then( async (response) => {
-        //   const user = await response.json();
-        //   // context.response.status = 200;
-        //   context.response.body = {user};
-        // })
+          context.response.body = {user, access_token, refresh_token, expires_in};
+        }).catch((error) => {
+          context.response.status = 500;
+          context.response.body = { message: error.message };
+        })
 
       } catch (e) {
         context.response.status = 500;
