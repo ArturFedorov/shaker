@@ -1,18 +1,23 @@
+import {Util} from '../../shared/utils/Util.ts';
+import {ILoginConfiguration} from '../../shared/interfaces/auth/ILoginConfiguration.ts';
+
 export class AuthService {
-  static baseUrl: string = 'https://accounts.spotify.com/';
-  static client_id: string = Deno.env.get('SPOTIFY_CLIENT_ID') as string;
-  static client_secret: string = Deno.env.get('SPOTIFY_CLIENT_SECRET') as string;
-  static redirect_uri: string = 'http://localhost:3000/callback';
-  static scopes: string = 'user-read-private user-read-email';
+  state = Util.generateRandomString(16);
 
-  static generateRandomString(length: number) {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  private config: ILoginConfiguration;
 
-    for (let i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
+  constructor(config: ILoginConfiguration) {
+    this.config = config;
+  }
 
-    return text;
+  configureLoginParams() {
+    const params = new URLSearchParams();
+    params.set('response_type', 'code');
+    params.set('client_id', this.config.client_id!);
+    params.set('scope', this.config.scopes!);
+    params.set('redirect_uri', this.config.redirect_uri!);
+    params.set('state', this.state);
+
+    return params;
   }
 }

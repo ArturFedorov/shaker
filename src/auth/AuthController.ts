@@ -1,23 +1,17 @@
 import { RouterContext } from '../../deps.ts';
 import { router } from '../Router.ts';
-import {AuthService} from './AuthService.ts';
+import { AuthConfig } from '../../configs/AuthConfig.ts';
 import { getQuery } from '../../deps.ts';
+import {AuthService} from './AuthService.ts';
 
-let state = AuthService.generateRandomString(16);
 let stateKey = 'spotify_auth_state';
+const service = new AuthService(AuthConfig.spotify);
 
 router
   .get('/login', (context: RouterContext) => {
-    const params = new URLSearchParams();
-    params.set('response_type', 'code');
-    params.set('client_id', AuthService.client_id);
-    params.set('scope', AuthService.scopes);
-    params.set('redirect_uri', AuthService.redirect_uri);
-    params.set('state', state);
+    context.cookies.set(stateKey, service.state);
 
-    context.cookies.set(stateKey, state);
-
-    context.response.redirect(`${AuthService.baseUrl}authorize?${params}`);
+    context.response.redirect(`${AuthConfig.spotify.baseUrl}authorize?${service.configureLoginParams()}`);
 })
   .get('/callback', async (context: RouterContext) => {
 
@@ -30,7 +24,7 @@ router
     if (state === null || state != storedState) {
       const searchParams = new URLSearchParams();
       searchParams.set('error', 'state_mismatch')
-      // context.response.redirect(`/#${searchParams}`);
+
       context.response.status = 500;
       context.response.body = { message: 'state_mismatch' };
     } else {
@@ -38,15 +32,15 @@ router
       const newSearchParams = new URLSearchParams();
 
       newSearchParams.set('code', code ? code : '');
-      newSearchParams.set('redirect_uri', AuthService.redirect_uri);
+      newSearchParams.set('redirect_uri', AuthConfig.spotify.redirect_uri!);
       newSearchParams.set('grant_type', 'authorization_code');
       // newSearchParams.set('grant_type', 'client_credentials')
 
       let authOptions = {
-        url: `${AuthService.baseUrl}api/token`,
+        url: `${AuthConfig.spotify.baseUrl}api/token`,
         form: newSearchParams,
         headers: {
-          'Authorization': `Basic ${window.btoa(`${AuthService.client_id}:${AuthService.client_secret}`)}`,
+          'Authorization': `Basic ${window.btoa(`${AuthConfig.spotify.client_id}:${AuthConfig.spotify.client_secret}`)}`,
           'Content-Type':'application/x-www-form-urlencoded'
         }
       };
@@ -59,7 +53,7 @@ router
         })
 
         const { access_token, refresh_token, expires_in} = await response.json();
-
+        console.log(Deno.env.toObject());
         return fetch(`https://api.spotify.com/v1/me`, {
           headers: { 'Authorization': `Bearer ${access_token}`}
         }).then( async (response) => {
@@ -89,7 +83,7 @@ router
     const response = await fetch('${AuthService.baseUrl}api/token', {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${window.btoa(`${AuthService.client_id}:${AuthService.client_secret}`)}`
+        'Authorization': `Basic ${window.btoa(`${AuthConfig.spotify.client_id}:${AuthConfig.spotify.client_secret}`)}`
       },
       body: params
     });
@@ -99,4 +93,5 @@ router
     context.response.body =  { access_token };
 
   });
+
 export default router;

@@ -1,7 +1,7 @@
 import { RouterContext } from '../../deps.ts';
 import { router } from '../Router.ts';
 
-router.get('/items', (context: RouterContext) => {
+router.get('/spotify', (context: RouterContext) => {
   context.response.body = 'HEllo';
 });
 

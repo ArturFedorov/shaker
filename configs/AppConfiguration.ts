@@ -1,10 +1,6 @@
-// import { config } from '../deps.ts';
-//
-// const env = config();
-
 export class AppConfiguration {
   static general = {
-    projectName: Deno.env.get('DENO_PROJECT_NAME') || "deno-seed",
+    projectName: Deno.env.get('DENO_PROJECT_NAME') || "shaker",
   };
 
   static server = {
