@@ -3,6 +3,8 @@ import { router } from '../Router.ts';
 import { AuthConfig } from '../../configs/AuthConfig.ts';
 import { getQuery } from '../../deps.ts';
 import {AuthService} from './AuthService.ts';
+import {http} from '../../api/http.ts';
+import {ITokenResponse} from '../../shared/interfaces/auth/ITokenResponse.ts';
 
 let stateKey = 'spotify_auth_state';
 const service = new AuthService(AuthConfig.spotify);
@@ -10,65 +12,38 @@ const service = new AuthService(AuthConfig.spotify);
 router
   .get('/login', (context: RouterContext) => {
     context.cookies.set(stateKey, service.state);
+    context.response.body = `${AuthConfig.spotify.baseUrl}authorize?${service.configureLoginParams()}`;
+  })
+  .post('/token', async (context: RouterContext) => {
+    const body = await context.request.body();
+    const { code, state } = body.value;
 
-    context.response.redirect(`${AuthConfig.spotify.baseUrl}authorize?${service.configureLoginParams()}`);
-})
-  .get('/callback', async (context: RouterContext) => {
-
-    const params = getQuery(context, {mergeParams: true});
-    const code = params.code || null;
-    const state = params.state || null;
     const storedState = context.cookies ? context.cookies.get(stateKey) : null;
 
 
     if (state === null || state != storedState) {
-      const searchParams = new URLSearchParams();
-      searchParams.set('error', 'state_mismatch')
-
       context.response.status = 500;
       context.response.body = { message: 'state_mismatch' };
     } else {
       context.cookies.set(stateKey, null);
       const newSearchParams = new URLSearchParams();
 
-      newSearchParams.set('code', code ? code : '');
+      newSearchParams.set('code', code || '');
       newSearchParams.set('redirect_uri', AuthConfig.spotify.redirect_uri!);
       newSearchParams.set('grant_type', 'authorization_code');
-      // newSearchParams.set('grant_type', 'client_credentials')
 
-      let authOptions = {
-        url: `${AuthConfig.spotify.baseUrl}api/token`,
-        form: newSearchParams,
-        headers: {
-          'Authorization': `Basic ${window.btoa(`${AuthConfig.spotify.client_id}:${AuthConfig.spotify.client_secret}`)}`,
-          'Content-Type':'application/x-www-form-urlencoded'
-        }
-      };
+
 
       try {
-        const response = await fetch(authOptions.url, {
-          method: 'POST',
-          headers: authOptions.headers,
-          body: authOptions.form
-        })
+        const { access_token, refresh_token, expires_in} = await http.POST<ITokenResponse>(`${AuthConfig.spotify.baseUrl}api/token`, {
+          headers: service.setAuthHeaders(),
+          body: newSearchParams
+        });
 
-        const { access_token, refresh_token, expires_in} = await response.json();
-        console.log(Deno.env.toObject());
-        return fetch(`https://api.spotify.com/v1/me`, {
-          headers: { 'Authorization': `Bearer ${access_token}`}
-        }).then( async (response) => {
-          const user = await response.json();
-          // context.response.status = 200;
-
-          context.response.body = {user, access_token, refresh_token, expires_in};
-        }).catch((error) => {
-          context.response.status = 500;
-          context.response.body = { message: error.message };
-        })
-
+        context.response.body = {access_token, refresh_token, expires_in};
       } catch (e) {
-        context.response.status = 500;
-        context.response.body = { message: 'invalid_token' };
+        context.response.status = e.code;
+        context.response.body = { message: e.message };
       }
     }
 

@@ -8,9 +8,9 @@ export class http {
     return this.makeRequest(url, options);
   }
 
-  static POST<T>(url: string, options: RequestInit) {
+  static POST<T>(url: string, options: RequestInit): Promise<T> {
     options.method = HttpMethods.POST;
-    return this.makeRequest(url, options);
+    return this.makeRequest<T>(url, options);
   }
 
 

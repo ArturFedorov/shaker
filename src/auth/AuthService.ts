@@ -20,4 +20,11 @@ export class AuthService {
 
     return params;
   }
+
+  setAuthHeaders() {
+    return {
+      'Authorization': `Basic ${window.btoa(`${this.config.client_id}:${this.config.client_secret}`)}`,
+      'Content-Type':'application/x-www-form-urlencoded'
+    }
+  }
 }
