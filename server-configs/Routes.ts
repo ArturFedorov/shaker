@@ -8,11 +8,11 @@ export class Routes {
 
     const allControllers = Util.findFilesInDirectory('src/', []);
     if (!allControllers.length) {
-      Logger.appLogger.info('No files of controller found.');
+      Logger.appLogger.info('No files of router found.');
     }
 
     for (const controllerPath of allControllers) {
-      Logger.appLogger.info(`Register controller ${controllerPath}`);
+      Logger.appLogger.info(`Register router ${controllerPath}`);
       const route: { default: Router } = await import(controllerPath);
 
       routes.push(route.default);

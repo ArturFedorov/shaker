@@ -1,20 +1,27 @@
 import { RouterContext } from '../../deps.ts';
-import { router } from '../Router.ts';
 import { AuthConfig } from '../../configs/AuthConfig.ts';
 import { getQuery } from '../../deps.ts';
 import {AuthService} from './AuthService.ts';
 import {http} from '../../api/http.ts';
 import {ITokenResponse} from '../../shared/interfaces/auth/ITokenResponse.ts';
+import {IAuthService} from '../../shared/interfaces/auth/IAuthService.ts';
 
 let stateKey = 'spotify_auth_state';
 const service = new AuthService(AuthConfig.spotify);
 
-router
-  .get('/login', (context: RouterContext) => {
+export class AuthController {
+  private service: IAuthService;
+
+  constructor(service: AuthService) {
+    this.service = service;
+  }
+
+  public login(context: RouterContext) {
     context.cookies.set(stateKey, service.state);
     context.response.body = `${AuthConfig.spotify.baseUrl}authorize?${service.configureLoginParams()}`;
-  })
-  .post('/token', async (context: RouterContext) => {
+  }
+
+  public async getToken(context: RouterContext) {
     const body = await context.request.body();
     const { code, state } = body.value;
 
@@ -46,27 +53,26 @@ router
         context.response.body = { message: e.message };
       }
     }
+  }
 
-  })
-  .get('/refresh_token', async (context: RouterContext) => {
-    const {refresh_token} = getQuery(context, {mergeParams: true});
+  public async refreshToken(context: RouterContext) {
+    const body = await context.request.body();
+    const { refresh_token } = body.value;
 
     const params = new URLSearchParams();
     params.set('refresh_token', refresh_token);
     params.set('grant_type', 'refresh_token');
 
-    const response = await fetch('${AuthService.baseUrl}api/token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${window.btoa(`${AuthConfig.spotify.client_id}:${AuthConfig.spotify.client_secret}`)}`
-      },
-      body: params
-    });
+    try {
+      const { access_token } = await http.POST<ITokenResponse>(`${AuthConfig.spotify.baseUrl}api/token`, {
+        headers: service.setAuthHeaders(),
+        body: params
+      });
 
-    const { access_token } = await response.json();
-
-    context.response.body =  { access_token };
-
-  });
-
-export default router;
+      context.response.body = { access_token };
+    } catch (e) {
+      context.response.status = e.code;
+      context.response.body = { message: e.message };
+    }
+  }
+}

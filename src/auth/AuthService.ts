@@ -1,7 +1,8 @@
 import {Util} from '../../shared/utils/Util.ts';
 import {ILoginConfiguration} from '../../shared/interfaces/auth/ILoginConfiguration.ts';
+import {IAuthService} from '../../shared/interfaces/auth/IAuthService.ts';
 
-export class AuthService {
+export class AuthService implements IAuthService {
   state = Util.generateRandomString(16);
 
   private config: ILoginConfiguration;

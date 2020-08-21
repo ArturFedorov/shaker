@@ -1,8 +1,8 @@
 import { RouterContext } from '../../deps.ts';
-import { router } from '../Router.ts';
 
-router.get('/spotify', (context: RouterContext) => {
-  context.response.body = 'HEllo';
-});
+export class ItemsController {
+  public items = (context: RouterContext) => {
+    context.response.body = 'HEllo2';
+  }
+}
 
-export default router;

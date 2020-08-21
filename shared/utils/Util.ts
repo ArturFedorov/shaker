@@ -8,7 +8,7 @@ export class Util {
   public static findFilesInDirectory(
     dir: string,
     fileList: string[],
-    nameMask = "Controller",
+    nameMask = 'Router',
   ): string[] {
     let files = Deno.readDirSync(dir);
     fileList = fileList || [];
