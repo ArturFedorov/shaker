@@ -16,12 +16,12 @@ export class Util {
     for (const dirEntry of files) {
       if (dirEntry.isDirectory) {
         fileList = Util.findFilesInDirectory(
-          `${dir}${dirEntry.name}`,
+          `${dir}${dirEntry.name}/`,
           fileList,
         );
       } else {
         if (dirEntry.name.includes(nameMask)) {
-          fileList.push(`../${dir}/${dirEntry.name}`);
+          fileList.push(`../${dir}${dirEntry.name}`);
         }
       }
     }

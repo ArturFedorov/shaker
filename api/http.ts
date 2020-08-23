@@ -2,7 +2,7 @@ import { Logger } from '../server-configs/Logger.ts';
 import ApiError from './ApiError.ts';
 import {HttpMethods} from './HttpMethods.ts';
 
-export class http {
+export class Http {
   static GET<T>(url: string, options: RequestInit) {
     options.method = HttpMethods.GET;
     return this.makeRequest(url, options);

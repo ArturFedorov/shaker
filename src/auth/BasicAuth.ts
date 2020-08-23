@@ -1,4 +1,6 @@
 import {RouterContext} from '../../deps.ts';
+import {AuthKeys} from './AuthKeys.ts';
+import {AuthConfig} from '../../configs/AuthConfig.ts';
 
 const openUrls: Map<string, RegExp[]> = new Map<string, RegExp[]>()
   .set('GET', [
@@ -21,13 +23,21 @@ export class BasicAuth {
             .some(pathRegExp => pathRegExp.test(path));
   }
 
-  static authenticate(context: RouterContext, next: any) {
+  static authenticate(context: RouterContext, next: () => Promise<void>) {
 
     // ByPass authentication open API
     if (BasicAuth.noAuth(context.request.method, context.request.url.pathname)) {
       return next();
     }
 
-    next();
+    const access_token = AuthConfig.spotify[AuthKeys.ACCESS_TOKEN];
+    const refresh_token = AuthConfig.spotify[AuthKeys.REFRESH_TOKEN];
+    const expiration_date = AuthConfig.spotify[AuthKeys.EXPIRATION_DATE];
+
+    if(expiration_date && new Date() >= new Date(expiration_date)) {
+      context.response.redirect('/spotify/token/refresh')
+    }
+
+    return  next();
   }
 }

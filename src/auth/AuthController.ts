@@ -1,8 +1,7 @@
-import { RouterContext } from '../../deps.ts';
-import { AuthConfig } from '../../configs/AuthConfig.ts';
-import { getQuery } from '../../deps.ts';
+import {RouterContext} from '../../deps.ts';
+import {AuthConfig} from '../../configs/AuthConfig.ts';
 import {AuthService} from './AuthService.ts';
-import {http} from '../../api/http.ts';
+import {Http} from '../../api/http.ts';
 import {ITokenResponse} from '../../shared/interfaces/auth/ITokenResponse.ts';
 import {IAuthService} from '../../shared/interfaces/auth/IAuthService.ts';
 import {AuthKeys} from './AuthKeys.ts';
@@ -43,14 +42,15 @@ export class AuthController {
 
 
       try {
-        const { access_token, refresh_token, expires_in} = await http.POST<ITokenResponse>(`${AuthConfig.spotify.baseUrl}api/token`, {
+        const { access_token, refresh_token, expires_in} = await Http.POST<ITokenResponse>(`${AuthConfig.spotify.baseUrl}api/token`, {
           headers: service.setAuthHeaders(),
           body: newSearchParams
         });
 
-        Deno.env.set(AuthKeys.ACCESS_TOKEN, access_token);
-        Deno.env.set(AuthKeys.REFRESH_TOKEN, refresh_token);
-        Deno.env.set(AuthKeys.EXPIRES_IN, expires_in.toString());
+        AuthConfig.spotify[AuthKeys.ACCESS_TOKEN] = access_token;
+        AuthConfig.spotify[AuthKeys.REFRESH_TOKEN] = refresh_token;
+        AuthConfig.spotify[AuthKeys.EXPIRES_IN] = expires_in;
+        AuthConfig.spotify[AuthKeys.EXPIRATION_DATE] = new Date().getTime() + expires_in * 1000;
 
         context.response.body = {access_token, refresh_token, expires_in};
       } catch (e) {
@@ -69,7 +69,7 @@ export class AuthController {
     params.set('grant_type', AuthKeys.REFRESH_TOKEN);
 
     try {
-      const { access_token, expires_in } = await http.POST<ITokenResponse>(`${AuthConfig.spotify.baseUrl}api/token`, {
+      const { access_token, expires_in } = await Http.POST<ITokenResponse>(`${AuthConfig.spotify.baseUrl}api/token`, {
         headers: service.setAuthHeaders(),
         body: params
       });
