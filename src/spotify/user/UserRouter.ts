@@ -7,7 +7,7 @@ const controller = new UserController();
 
 userRouter
   .get('/items', BasicAuth.authenticate, controller.items)
-  .get('/user', controller.getCurrentUser);
+  .get('/user', BasicAuth.authenticate, controller.getCurrentUser);
 
 export default userRouter;
 

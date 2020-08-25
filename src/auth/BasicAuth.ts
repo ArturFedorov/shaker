@@ -4,7 +4,9 @@ import {AuthConfig} from '../../configs/AuthConfig.ts';
 
 const openUrls: Map<string, RegExp[]> = new Map<string, RegExp[]>()
   .set('GET', [
-
+    new RegExp('/login'),
+    new RegExp('/token'),
+    new RegExp('/token/refresh')
   ]);
 
 export class BasicAuth {
@@ -31,13 +33,19 @@ export class BasicAuth {
     }
 
     const access_token = AuthConfig.spotify[AuthKeys.ACCESS_TOKEN];
-    const refresh_token = AuthConfig.spotify[AuthKeys.REFRESH_TOKEN];
     const expiration_date = AuthConfig.spotify[AuthKeys.EXPIRATION_DATE];
 
-    if(expiration_date && new Date() >= new Date(expiration_date)) {
-      context.response.redirect('/spotify/token/refresh')
+    if(!access_token) {
+      context.response.status = 401;
+      context.response.body = 'No token provided';
+      return;
     }
 
-    return  next();
+    if(expiration_date && new Date() >= new Date(expiration_date)) {
+      context.response.redirect('/spotify/token/refresh');
+      return;
+    }
+
+    return next();
   }
 }

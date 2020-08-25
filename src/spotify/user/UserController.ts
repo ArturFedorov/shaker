@@ -31,7 +31,7 @@ export class UserController {
   }
 
   public async getCurrentUser(context: RouterContext) {
-    context.response.body = await UserService.getCurrentUser() as any
+    context.response.body = await UserService.getCurrentUser();
   }
 }
 

@@ -6,7 +6,6 @@ import { Routes } from './server-configs/Routes.ts';
 const app = new Application();
 Logger.initLogger();
 
-
 for (const router of await Routes.getConfiguredRoutes()) {
   app.use(router.routes());
   app.use(router.allowedMethods());
