@@ -1,4 +1,5 @@
 import {IUser} from './IUser.ts';
+import {IImage} from '../../common/IImage.ts';
 
 export interface ISpotifyUser extends IUser {
   country: string;
@@ -11,7 +12,7 @@ export interface ISpotifyUser extends IUser {
     href?: string;
     total: number;
   }
-  images: { url: string } [],
+  images: IImage [],
   product: string;
   type: string;
   uri: string;

@@ -6,8 +6,8 @@ const router = new Router({prefix: '/spotify'});
 const controller = new UserController();
 
 router
-  .get('/items', BasicAuth.authenticate, controller.items)
-  .get('/user', BasicAuth.authenticate, controller.getCurrentUser);
+  .get('/user', BasicAuth.authenticate, controller.getCurrentUser)
+  .get('/user/tracks', BasicAuth.authenticate, controller.getUserTopTracks);
 
 export default router;
 

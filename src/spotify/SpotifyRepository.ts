@@ -13,6 +13,6 @@ export class SpotifyRepository {
       headers: {
         Authorization: `Bearer ${AuthConfig.spotify[AuthKeys.ACCESS_TOKEN]}`
       }
-    })
+    });
   }
 }
