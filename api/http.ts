@@ -18,7 +18,7 @@ export class Http {
     return fetch(url, options)
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Network error has occured');
+          throw new Error(`${response.status} - ${response.statusText}. Network error has occured`);
         }
 
         return response.json() as Promise<T>

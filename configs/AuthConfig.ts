@@ -7,7 +7,7 @@ export class AuthConfig {
      client_id:  Deno.env.get('SPOTIFY_CLIENT_ID'),
      client_secret:  Deno.env.get('SPOTIFY_CLIENT_SECRET'),
      redirect_uri:  'http://localhost:8080',
-     scopes: 'user-read-private user-read-email',
+     scopes: 'user-read-private user-read-email user-top-read',
      [AuthKeys.ACCESS_TOKEN]: '',
      [AuthKeys.REFRESH_TOKEN]: '',
      [AuthKeys.EXPIRES_IN]: 0,

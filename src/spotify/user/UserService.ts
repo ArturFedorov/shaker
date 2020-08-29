@@ -7,7 +7,15 @@ export class UserService {
     return SpotifyRepository.GET<ISpotifyUser>('/me');
   }
 
+  private static getUserTopData(parameter: string, limit = '20', offset = '0') {
+    return SpotifyRepository.GET<ITrackResponse>(`/me/top/${parameter}?offset=${offset}&limit=${limit}`);
+  }
+
+  static getUserTopArtists(limit = '20', offset = '0'): Promise<ITrackResponse> {
+    return this.getUserTopData('artists', limit, offset);
+  }
+
   static getUserTopTracks(limit = '20', offset = '0'): Promise<ITrackResponse> {
-    return SpotifyRepository.GET<ITrackResponse>(`/me/top/tracks`); //?offset=${offset}&limit=${limit}
+    return this.getUserTopData('tracks', limit, offset);
   }
 }

@@ -7,6 +7,7 @@ const controller = new UserController();
 
 router
   .get('/user', BasicAuth.authenticate, controller.getCurrentUser)
+  .get('/user/artists', BasicAuth.authenticate, controller.getUserTopArtists)
   .get('/user/tracks', BasicAuth.authenticate, controller.getUserTopTracks);
 
 export default router;
