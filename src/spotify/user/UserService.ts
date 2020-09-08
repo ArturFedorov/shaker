@@ -11,11 +11,11 @@ export class UserService {
     return SpotifyRepository.GET<ITrackResponse>(`/me/top/${parameter}?offset=${offset}&limit=${limit}`);
   }
 
-  static getUserTopArtists(limit = '20', offset = '0'): Promise<ITrackResponse> {
+  static getUserTopArtists(limit: string, offset: string): Promise<ITrackResponse> {
     return this.getUserTopData('artists', limit, offset);
   }
 
-  static getUserTopTracks(limit = '20', offset = '0'): Promise<ITrackResponse> {
+  static getUserTopTracks(limit: string, offset: string): Promise<ITrackResponse> {
     return this.getUserTopData('tracks', limit, offset);
   }
 }
