@@ -7,6 +7,17 @@
       "allow": [
         "write",
         "read",
+        "net",
+        "env"
+      ]
+    },
+    "debug": {
+      "cmd": "deno run server.ts",
+      "desc": "debug shaker application",
+      "inspect": "127.0.0.1:3000",
+      "allow":[
+        "write",
+        "read",
         "net"
       ]
     },
