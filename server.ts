@@ -3,72 +3,91 @@ import { AppConfiguration } from './configs/AppConfiguration.ts';
 import { Logger } from './server-configs/Logger.ts';
 import { Routes } from './server-configs/Routes.ts';
 
-import { applyGraphQL, gql, GQLError } from 'https://deno.land/x/oak_graphql/mod.ts';
+import { applyGraphQL, gql } from "https://deno.land/x/oak_graphql/mod.ts";
 
 const app = new Application();
-Logger.initLogger();
+
+app.use(async (ctx, next) => {
+  await next();
+  const rt = ctx.response.headers.get("X-Response-Time");
+  console.log(`${ctx.request.method} ${ctx.request.url} - ${rt}`);
+});
+
+app.use(async (ctx, next) => {
+  const start = Date.now();
+  await next();
+  const ms = Date.now() - start;
+  ctx.response.headers.set("X-Response-Time", `${ms}ms`);
+});
+
+// Logger.initLogger();
 //
 // for (const router of await Routes.getConfiguredRoutes()) {
 //   app.use(router.routes());
 //   app.use(router.allowedMethods());
 // }
-const types = (gql as any)`
-type User {
-  firstName: String
-  lastName: String
-}
-
-input UserInput {
-  firstName: String
-  lastName: String
-}
-
-type ResolveType {
-  done: Boolean
-}
-
-type Query {
-  getUser(id: String): User
-}
-
-type Mutation {
-  setUser(input: UserInput!): ResolveType!
-}
+const types = gql`
+  type Dino {
+    name: String
+    image: String
+  }
+  input DinoInput {
+    name: String
+    image: String
+  }
+  type ResolveType {
+    done: Boolean
+  }
+  type Query {
+    getDino(name: String): Dino
+    getDinos: [Dino!]!
+  }
+  type Mutation {
+    addDino(input: DinoInput!): ResolveType!
+  }
 `;
 
+const dinos = [
+  {
+    name: "Tyrannosaurus Rex",
+    image: "🦖",
+  },
+];
+
 const resolvers = {
-    Query: {
-        getUser: (parent: any, { id }: any, context: any, info: any) => {
-            console.log('id', id, context);
-            if(context.user === 'Aaron') {
-                throw new GQLError({ type: 'auth error in context' })
-            }
-            return {
-                firstName: 'wooseok',
-                lastName: 'lee',
-            };
-        },
+  Query: {
+    getDino: (_: any, { name }: any) => {
+      const dino = dinos.find((dino) => dino.name.includes(name));
+      if (!dino) {
+        throw new Error(`No dino name includes ${name}`);
+      }
+      return dino;
     },
-    Mutation: {
-        setUser: (parent: any, { input: { firstName, lastName } }: any, context: any, info: any) => {
-            console.log('input:', firstName, lastName);
-            return {
-                done: true,
-            };
-        },
+    getDinos: () => {
+      console.log('qwqwd')
+      return dinos;
     },
+  },
+  Mutation: {
+    addDino: (_: any, { input: { name, image } }: any) => {
+      dinos.push({
+        name,
+        image,
+      });
+      return {
+        done: true,
+      };
+    },
+  },
 };
 
 const GraphQLService = await applyGraphQL({
-    Router,
-    path: '/graphql',
-    typeDefs: types,
-    resolvers: resolvers,
-    context: (ctx: RouterContext) => {
-        return { user: 'Aaron' };
-    }
-})
+  typeDefs: types,
+  resolvers: resolvers,
+  Router
+});
 
-app.use(GraphQLService.routes(), GraphQLService.allowedMethods());
-
+app.use(GraphQLService.routes());
+app.use( GraphQLService.allowedMethods());
+console.log("Server start at http://localhost:8080");
 await app.listen({ port: 8080 }); // AppConfiguration.server.port
